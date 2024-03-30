@@ -1,0 +1,55 @@
+{
+  "compilerOptions": {
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "experimentalDecorators": true,
+    "resolveJsonModule": true,
+    "emitDecoratorMetadata": true,
+    "moduleResolution": "node",
+    "removeComments": true,
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strictPropertyInitialization": false,
+    "skipLibCheck": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "ESNext",
+    "module": "CommonJS",
+    "outDir": "./dist",
+    "rootDir": ".",
+    "strict": true,
+    "baseUrl": "./",
+    "paths": {
+      "@controllers/*": [
+        "./controllers/*"
+      ],
+      "@models/*": [
+            "./models/*"
+        ],
+      "@routes/*": [
+        "./routes/*"
+      ],
+      "@constants/*": [
+        "./constants/*"
+      ],
+      "@helpers/*": [
+        "./helpers/*"
+      ],
+      "@config/*": [
+        "./config/*"
+      ],
+      "@logger/*": [
+        "./logger/*"
+      ],
+      "@middlewares/*": [
+            "./middlewares/*"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "dist"
+  ]
+}
