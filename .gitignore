@@ -4,4 +4,4 @@ dist
 docker
 examples
 .env.local
-.idea
+.idea/
