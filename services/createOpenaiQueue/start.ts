@@ -1,13 +1,13 @@
 /* eslint-disable no-await-in-loop */
 import "dotenv/config";
 import { mongoMain } from "@helpers/mongoConnectionManager";
-import config from "../../config";
 import { logger } from "../../logger";
+import config from "../../config";
 import sleep from "../../helpers/sleep";
 
-import fetchPatterns from "./index";
+import createOpenaiQueue from "./index";
 
-const sleepSeconds = config.fetchPatterns.sleepTimeSeconds;
+const sleepSeconds = config.createOpenaiQueue.sleepTimeSeconds;
 
 process.on("SIGINT", async () => {
 	try {
@@ -25,7 +25,7 @@ process.on("SIGINT", async () => {
 			try {
 				await mongoMain.connect();
 				logger.info("Fetching patterns");
-				await fetchPatterns();
+				await createOpenaiQueue();
 			} catch (e) {
 				logger.error(`Error at fetchPatterns ${e}`);
 				logger.error(e);
@@ -35,7 +35,7 @@ process.on("SIGINT", async () => {
 			await sleep(sleepSeconds);
 		}
 	} catch (e) {
-		logger.error(`Error at fetchPatterns start ${e}`, e);
+		logger.error(`Error at txReceiver start file ${e}`, e);
 		process.exit(1);
 	}
 })();

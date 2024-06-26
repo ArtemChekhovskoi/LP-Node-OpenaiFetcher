@@ -5,7 +5,9 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start-patternsFetcher:local": "NODE_ENV=local ts-node-dev --respawn -r tsconfig-paths/register ./services/fetchPatterns/start.ts"
+    "local:fetchPatterns": "NODE_ENV=local ts-node-dev --respawn -r tsconfig-paths/register ./services/fetchPatterns/start.ts",
+    "local:createOpenaiQueue": "NODE_ENV=local ts-node-dev --respawn -r tsconfig-paths/register ./services/createOpenaiQueue/start.ts",
+    "start:local": "concurrently --kill-others npm:local:*"
   },
   "keywords": [],
   "author": "",
@@ -17,7 +19,7 @@
     "cookie-session": "^2.0.0",
     "cors": "^2.8.5",
     "dayjs": "^1.11.10",
-    "dotenv": "^16.3.1",
+    "dotenv": "^16.4.5",
     "express": "^4.18.2",
     "express-rate-limit": "^6.7.0",
     "jsonwebtoken": "^9.0.2",
@@ -34,6 +36,7 @@
     "@typescript-eslint/eslint-plugin": "^5.57.0",
     "@typescript-eslint/parser": "^5.57.0",
     "eslint": "^8.37.0",
+    "concurrently": "^8.2.2",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-config-airbnb-typescript": "^17.1.0",

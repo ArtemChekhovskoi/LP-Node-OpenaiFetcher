@@ -1,0 +1,8 @@
+const USERS_PATTERNS_STATUSES = {
+	NEW: 0,
+	PENDING: 1,
+	ERROR: 2,
+	DONE: 3,
+};
+
+export { USERS_PATTERNS_STATUSES };

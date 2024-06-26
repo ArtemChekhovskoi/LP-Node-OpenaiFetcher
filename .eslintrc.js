@@ -44,7 +44,8 @@ module.exports = {
                 "ts": "never",
                 "tsx": "never"
             }
-        ]
+        ],
+        "no-constant-condition": ["error", { "checkLoops": false }],
     },
     "settings": {
         "import/parsers": {
