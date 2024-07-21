@@ -1,6 +1,5 @@
 import { Kafka, logLevel, Producer } from "kafkajs";
 import { logger } from "logger";
-import * as process from "process";
 
 const DEFAULT_BROKER = process.env.KAFKA_BROKER || "localhost:9092";
 interface IConsumerMessageHandler {
