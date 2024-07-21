@@ -6,9 +6,9 @@ type Env = "local" | "development" | "production";
 const env: Env = process.env.NODE_ENV as Env;
 
 const config = {
-    local,
-    development,
-    production,
+	local,
+	development,
+	production,
 };
 
 export default config[env];
