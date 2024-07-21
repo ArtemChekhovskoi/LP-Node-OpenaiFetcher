@@ -1,6 +1,8 @@
 import { Kafka, logLevel, Producer } from "kafkajs";
 import { logger } from "logger";
+import * as process from "process";
 
+const DEFAULT_BROKER = process.env.KAFKA_BROKER || "localhost:9092";
 interface IConsumerMessageHandler {
 	topic: string;
 	partition: number;
@@ -20,7 +22,7 @@ class KafkaConfig {
 		this.kafka = !this.kafka
 			? new Kafka({
 					logLevel: logLevel.ERROR,
-					brokers: ["localhost:9093"],
+					brokers: [DEFAULT_BROKER],
 					clientId: "example-producer",
 				})
 			: this.kafka;

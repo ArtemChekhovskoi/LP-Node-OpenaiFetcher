@@ -30,6 +30,8 @@ async function main() {
 			{ active: true },
 			{ pair: true, compareIntervalValue: true, compareIntervalType: true }
 		).lean();
+
+		const usersOpenaiPatternsIDsArray: string[] = [];
 		for (let i = 0; i < patternsInUsersQueueCount; i += PATTERNS_BATCH_SIZE) {
 			const patternsInUsersQueue = await UsersOpenaiPatternsQueue.find({}, { openaiPatternsID: true, usersID: true })
 				.skip(i)
@@ -127,8 +129,9 @@ async function main() {
 			await mongoSession.endSession();
 
 			const usersOpenaiPatternsIDs = newUsersOpenaiPatternsDocs.map((doc) => doc._id!.toString());
-			await kafka.produce(KAFKA_TOPICS.NEW_PATTERNS_FOUND, [{ value: JSON.stringify({ usersOpenaiPatternsIDs }) }]);
+			usersOpenaiPatternsIDsArray.push(...usersOpenaiPatternsIDs);
 		}
+		await kafka.produce(KAFKA_TOPICS.NEW_PATTERNS_FOUND, [{ value: JSON.stringify({ usersOpenaiPatternsIDsArray }) }]);
 	} catch (e) {
 		logger.error(`Error at fetchPatterns ${e}`, e);
 	} finally {
