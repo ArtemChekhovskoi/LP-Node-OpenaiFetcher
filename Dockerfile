@@ -13,7 +13,7 @@ RUN npm install pm2 -g
 COPY . .
 
 # Build the application
-RUN NODE_ENV=development npm i
+RUN npm run build
 
 RUN mv ./ecosystem.config.js ./dist/ecosystem.config.js
 
