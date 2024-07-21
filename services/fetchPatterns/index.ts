@@ -13,7 +13,7 @@ import { kafka } from "@helpers/kafkaConnectionManager";
 import { KAFKA_TOPICS } from "@constants/kafkaTopics";
 import config from "../../config";
 
-const PATTERNS_BATCH_SIZE = 5;
+const PATTERNS_BATCH_SIZE = 3;
 const MAX_INPUT_TOKENS = 8000;
 const { OPENAI_API_KEY } = process.env;
 
