@@ -3,7 +3,7 @@ module.exports = {
 	apps: [
 		{
 			name: "create-openai-queue",
-			script: "./src/services/createOpenaiQueue/start.js",
+			script: "./services/createOpenaiQueue/start.js",
 			autorestart: true,
 			exec_mode: "fork",
 			watch: false,
@@ -18,7 +18,7 @@ module.exports = {
 		},
 		{
 			name: "fetch-patterns",
-			script: "./src/services/fetchPatterns/start.js",
+			script: "./services/fetchPatterns/start.js",
 			autorestart: true,
 			exec_mode: "fork",
 			watch: false,
