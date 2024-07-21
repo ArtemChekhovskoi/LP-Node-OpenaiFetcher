@@ -10,22 +10,6 @@ const usersOpenaiPatternsQueue = new Schema(
 			type: Schema.Types.ObjectId,
 			required: true,
 		},
-		statusCode: {
-			type: Number,
-			required: true,
-		},
-		statusCodesHistory: [
-			{
-				statusCode: {
-					type: Number,
-					required: true,
-				},
-				created: {
-					type: Date,
-					required: true,
-				},
-			},
-		],
 		created: {
 			type: Date,
 			required: true,

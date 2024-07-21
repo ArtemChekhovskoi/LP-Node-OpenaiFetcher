@@ -1,4 +1,5 @@
 import { UsersOpenaiPatternsQueue } from "@models/users_openai_patterns_queue";
+import { encode } from "gpt-3-encoder";
 import { logger } from "@logger/index";
 import { OpenaiPatterns } from "@models/openai_patterns";
 import { getMeasurementsToFetch, TMeasurementCode } from "@helpers/getMeasurementsToFetch";
@@ -6,12 +7,21 @@ import dayjs from "dayjs";
 import OpenAI from "openai";
 import { FETCH_PATTERNS_PROMPT } from "@constants/prompts";
 import validateOpenaiPatternsResponse from "@helpers/validateOpenaiPatternsResponse";
+import { ClientSession, Document } from "mongoose";
+import { TUsersOpenaiPatterns, UsersOpenaiPatterns } from "@models/users_openai_patterns";
+import { kafka } from "@helpers/kafkaConnectionManager";
+import { KAFKA_TOPICS } from "@constants/kafkaTopics";
 import config from "../../config";
 
 const PATTERNS_BATCH_SIZE = 5;
+const MAX_INPUT_TOKENS = 8000;
+const { OPENAI_API_KEY } = process.env;
+
 async function main() {
+	let mongoSession: null | ClientSession = null;
+
 	try {
-		const patternsInUsersQueueCount = await UsersOpenaiPatternsQueue.countDocuments({ statusCode: 0 });
+		const patternsInUsersQueueCount = await UsersOpenaiPatternsQueue.countDocuments();
 		if (!patternsInUsersQueueCount) {
 			return;
 		}
@@ -21,7 +31,7 @@ async function main() {
 			{ pair: true, compareIntervalValue: true, compareIntervalType: true }
 		).lean();
 		for (let i = 0; i < patternsInUsersQueueCount; i += PATTERNS_BATCH_SIZE) {
-			const patternsInUsersQueue = await UsersOpenaiPatternsQueue.find({ statusCode: 0 }, { openaiPatternsID: true, usersID: true })
+			const patternsInUsersQueue = await UsersOpenaiPatternsQueue.find({}, { openaiPatternsID: true, usersID: true })
 				.skip(i)
 				.limit(PATTERNS_BATCH_SIZE)
 				.lean();
@@ -56,23 +66,75 @@ async function main() {
 						})
 					);
 
-					return { usersID: pattern.usersID, measurementPairWithData };
+					return { usersID: pattern.usersID, openaiPatternsID: pattern._id, measurementPairWithData };
 				})
 			);
 
-			const openai = new OpenAI({ apiKey: config.fetchPatterns.openaiApi });
-			const content = FETCH_PATTERNS_PROMPT(JSON.stringify(usersPatternsQueueWithData));
-			const completion = await openai.chat.completions.create({
-				messages: [{ role: "system", content }],
-				model: "gpt-4",
-			});
+			if (
+				!usersPatternsQueueWithData?.length ||
+				!usersPatternsQueueWithData.every((pattern) => !pattern || pattern?.measurementPairWithData?.length)
+			) {
+				logger.error(`No data fetched for patterns ${JSON.stringify(usersPatternsQueueWithData)}`);
+				return;
+			}
+			const openai = new OpenAI({ apiKey: OPENAI_API_KEY });
+			const content = FETCH_PATTERNS_PROMPT + JSON.stringify(usersPatternsQueueWithData);
+			const contentTokenized = encode(content);
+			if (contentTokenized.length > MAX_INPUT_TOKENS) {
+				logger.error(`Content is too long ${contentTokenized.length}`);
+			}
+
+			const completion = await openai.chat.completions
+				.create({
+					messages: [
+						{ role: "system", content: FETCH_PATTERNS_PROMPT },
+						{ role: "user", content: JSON.stringify(usersPatternsQueueWithData) as string },
+					],
+					model: "gpt-4",
+				})
+				.catch(async (err) => {
+					if (err instanceof OpenAI.APIError) {
+						logger.error(`Openai response error: ${err}`);
+					} else {
+						throw err;
+					}
+				});
 
 			const openaiAnswer = JSON.parse(completion?.choices?.[0]?.message?.content || "");
 			const isAnswerValid = validateOpenaiPatternsResponse(openaiAnswer);
+			if (!isAnswerValid) {
+				logger.error(`Openai answer is not valid ${JSON.stringify(openaiAnswer)}`);
+				return;
+			}
+
+			const usersPatternsQueueIDsToDelete = patternsInUsersQueue.map((pattern) => pattern._id);
+			const newUsersOpenaiPatternsDocs: Document<TUsersOpenaiPatterns>[] = openaiAnswer.map((answer: any) => {
+				return new UsersOpenaiPatterns({
+					usersID: answer.usersID,
+					openaiPatternsID: answer.openaiPatternsID,
+					measurementCodes: answer.measurementCodes,
+					isPatternFound: answer.isPatternFound,
+					title: answer.title,
+					description: answer.description,
+					isShownToUser: false,
+				});
+			});
+			mongoSession = await UsersOpenaiPatternsQueue.startSession();
+			await mongoSession.withTransaction(async () => {
+				await UsersOpenaiPatternsQueue.deleteMany({ _id: { $in: usersPatternsQueueIDsToDelete } });
+				await UsersOpenaiPatterns.insertMany(newUsersOpenaiPatternsDocs);
+			});
+			await mongoSession.endSession();
+
+			const usersOpenaiPatternsIDs = newUsersOpenaiPatternsDocs.map((doc) => doc._id!.toString());
+			await kafka.produce(KAFKA_TOPICS.NEW_PATTERNS_FOUND, [{ value: JSON.stringify({ usersOpenaiPatternsIDs }) }]);
 		}
 	} catch (e) {
 		logger.error(`Error at fetchPatterns ${e}`, e);
 	} finally {
+		if (mongoSession) {
+			await mongoSession.endSession();
+		}
 		logger.info(`Going to sleep for ${config.fetchPatterns.sleepTimeSeconds} seconds`);
 	}
 }

@@ -8,6 +8,10 @@ const openaiPatterns = new Schema(
 					type: String,
 					required: true,
 				},
+				displayName: {
+					type: String,
+					required: true,
+				},
 				recordsToFetch: {
 					min: {
 						type: Number,
@@ -26,6 +30,10 @@ const openaiPatterns = new Schema(
 			required: true,
 		},
 		compareIntervalValue: {
+			type: Number,
+			required: true,
+		},
+		sort: {
 			type: Number,
 			required: true,
 		},

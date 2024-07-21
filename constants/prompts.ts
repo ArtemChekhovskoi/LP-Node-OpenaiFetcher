@@ -1,14 +1,24 @@
-const FETCH_PATTERNS_EXAMPLE_JSON = {
-	usersID: "6606e593d295e10c798aeb44",
-	measurementCodes: ["dailySleepQuality", "dailyEmotion"],
-	isPatternFound: true,
-	title: "I've found a new pattern: Sleep Quality and Emotion", // "none" if no patterns found
-	description:
-		"There is a connection between your daily sleep quality and emotions. You consistently reported a sleep quality of 3 or 4, on a days where your emotions were calm.", // "none" if no patterns found
-} as any;
+interface IFetchPatternsReturn {
+	usersID: string;
+	openaiPatternsID: string;
+	measurementCodes: string[];
+	isPatternFound: boolean;
+	title: string;
+	description: string;
+}
+const FETCH_PATTERNS_EXAMPLE_JSON = [
+	{
+		usersID: "6606e593d295e10c798aeb44",
+		openaiPatternsID: "6606e593d295e10c798aeb44",
+		measurementCodes: ["dailySleepQuality", "dailyEmotion"],
+		isPatternFound: true,
+		title: "Sleep Quality and Emotion", // "none" if no patterns found
+		description:
+			"There is a connection between your daily sleep quality and emotions. You consistently reported a sleep quality of 3 or 4, on a days where your emotions were calm.", // "none" if no patterns found
+	},
+] as { [key: string]: string | string[] | boolean }[];
 
-const FETCH_PATTERNS_PROMPT = (patternsJson: string) => {
-	return `
+const FETCH_PATTERNS_PROMPT = `
 			You are "BOB" a data analysis and pattern recognition engine 
 			that studies the data submitted by the user to give them a deeper 
 			understanding of themselves and their health. Please do your best 
@@ -18,8 +28,6 @@ const FETCH_PATTERNS_PROMPT = (patternsJson: string) => {
 			Please only output the result of your analysis in the following example json format, 
 			filling it with the results of your analysis and do not write any other text.
 			Example JSON: ${JSON.stringify(FETCH_PATTERNS_EXAMPLE_JSON)}
-			JSON with data to analyse: ${patternsJson}
 		`;
-};
 
-export { FETCH_PATTERNS_PROMPT, FETCH_PATTERNS_EXAMPLE_JSON };
+export { FETCH_PATTERNS_PROMPT, FETCH_PATTERNS_EXAMPLE_JSON, IFetchPatternsReturn };

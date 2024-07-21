@@ -1,5 +1,11 @@
 /* eslint-disable no-await-in-loop */
-import "dotenv/config";
+/* eslint-disable import/first */
+
+import dotenv from "dotenv";
+import path from "path";
+
+dotenv.config({ path: path.join(__dirname, `../../.env.${process.env.NODE_ENV}`) });
+
 import { mongoMain } from "@helpers/mongoConnectionManager";
 import { logger } from "../../logger";
 import config from "../../config";
@@ -7,8 +13,11 @@ import sleep from "../../helpers/sleep";
 
 import createOpenaiQueue from "./index";
 
+console.log("process.env.NODE_ENV", process.env.NODE_ENV);
+console.log("path", path.join(__dirname, `../../.env.${process.env.NODE_ENV}`));
 const sleepSeconds = config.createOpenaiQueue.sleepTimeSeconds;
 
+console.log(process.env);
 process.on("SIGINT", async () => {
 	try {
 		await mongoMain.destroy();
@@ -21,10 +30,10 @@ process.on("SIGINT", async () => {
 
 (async () => {
 	try {
+		logger.info("Starting createOpenaiQueue");
 		while (true) {
 			try {
 				await mongoMain.connect();
-				logger.info("Fetching patterns");
 				await createOpenaiQueue();
 			} catch (e) {
 				logger.error(`Error at fetchPatterns ${e}`);

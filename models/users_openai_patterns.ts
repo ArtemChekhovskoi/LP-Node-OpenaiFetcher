@@ -10,9 +10,8 @@ const usersOpenaiPatterns = new Schema(
 			type: Schema.Types.ObjectId,
 			required: true,
 		},
-		openaiPatternsQueueID: {
+		usersNotificationsID: {
 			type: Schema.Types.ObjectId,
-			required: true,
 		},
 		isPatternFound: {
 			type: Boolean,
@@ -23,6 +22,11 @@ const usersOpenaiPatterns = new Schema(
 		},
 		description: {
 			type: String,
+		},
+		isShownToUser: {
+			type: Boolean,
+			required: true,
+			default: false,
 		},
 		created: {
 			type: Date,

@@ -5,6 +5,7 @@ import { UsersOpenaiPatternsQueue } from "@models/users_openai_patterns_queue";
 import dayjs from "dayjs";
 import { getMeasurementsToFetch, TMeasurementCode } from "@helpers/getMeasurementsToFetch";
 import { USERS_PATTERNS_STATUSES } from "@constants/patterns";
+import { UsersOpenaiPatterns } from "@models/users_openai_patterns";
 
 const USERS_BATCH_SIZE = 100;
 const createOpenaiQueue = async () => {
@@ -31,14 +32,40 @@ const createOpenaiQueue = async () => {
 
 			const usersPatternsQueueBulkWrite = [];
 			for (const user of users) {
+				// Grab only patterns that are not in the queue
 				const activePatternsIDsInQueue = usersPatterns
 					.filter((usersPattern) => usersPattern.usersID.toString() === user._id.toString())
 					.map((usersPattern) => usersPattern.openaiPatternsID.toString());
-				const usersPatternsToFetch = openaiPatterns.filter((pattern) => !activePatternsIDsInQueue.includes(pattern._id.toString()));
+				const usersPatternsNotInQueue = openaiPatterns.filter(
+					(pattern) => !activePatternsIDsInQueue.includes(pattern._id.toString())
+				);
 
-				if (!usersPatternsToFetch?.length) {
+				if (!usersPatternsNotInQueue?.length) {
 					continue;
 				}
+
+				// Check if we have fetched patterns for this user and period
+				const usersFetchedPatterns = await UsersOpenaiPatterns.find(
+					{
+						usersID: user._id,
+						openaiPatternsID: { $in: openaiPatterns.map((pattern) => pattern._id) },
+					},
+					{ openaiPatternsID: true, created: true }
+				).lean();
+				const usersPatternsToFetch = usersPatternsNotInQueue.filter((pattern) => {
+					const fetchedPattern = usersFetchedPatterns.find(
+						(userPattern) => userPattern.openaiPatternsID.toString() === pattern._id.toString()
+					);
+					if (!fetchedPattern) {
+						return true;
+					}
+					const futureFetchStartDate = dayjs(fetchedPattern.created)
+						.add(pattern.compareIntervalValue, pattern.compareIntervalType)
+						.startOf("day");
+					return futureFetchStartDate.isBefore(dayjs().startOf("day"));
+				});
+
+				// Fetch measurements for each pattern
 				const usersPatternsFetchParams = usersPatternsToFetch.map((pattern) => {
 					const fetchStartDate = dayjs()
 						.subtract(pattern.compareIntervalValue, pattern.compareIntervalType)
