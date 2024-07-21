@@ -102,6 +102,7 @@ async function main() {
 					}
 				});
 
+			logger.info("Openai response", completion?.choices?.[0]?.message?.content);
 			const openaiAnswer = JSON.parse(completion?.choices?.[0]?.message?.content || "");
 			const isAnswerValid = validateOpenaiPatternsResponse(openaiAnswer);
 			if (!isAnswerValid) {
