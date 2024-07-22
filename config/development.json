@@ -1,6 +1,6 @@
 {
   "fetchPatterns": {
-    "sleepTimeSeconds": 36000
+    "sleepTimeSeconds": 86400
   },
   "createOpenaiQueue": {
     "sleepTimeSeconds": 1800
