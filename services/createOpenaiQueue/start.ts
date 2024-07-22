@@ -13,11 +13,8 @@ import sleep from "../../helpers/sleep";
 
 import createOpenaiQueue from "./index";
 
-console.log("process.env.NODE_ENV", process.env.NODE_ENV);
-console.log("path", path.join(__dirname, `../../.env.${process.env.NODE_ENV}`));
 const sleepSeconds = config.createOpenaiQueue.sleepTimeSeconds;
 
-console.log(process.env);
 process.on("SIGINT", async () => {
 	try {
 		await mongoMain.destroy();

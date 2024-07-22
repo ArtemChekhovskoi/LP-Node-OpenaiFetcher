@@ -25,7 +25,6 @@ class MongoConnection implements IMongoConnection {
 		this.log = logger;
 		this.uri = connectionConfig.uri;
 		this.options = connectionConfig.options;
-		this.connect();
 	}
 
 	async connect() {

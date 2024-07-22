@@ -15,12 +15,9 @@ import fetchPatterns from "./index";
 
 const sleepSeconds = config.fetchPatterns.sleepTimeSeconds;
 
-// const kafka = new KafkaConfig();
-
 process.on("SIGINT", async () => {
 	try {
 		await mongoMain.destroy();
-		// await kafka.disconnect();
 	} catch (e) {
 		logger.error(`Error in disconnect event: ${e}`);
 		logger.error(e);

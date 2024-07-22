@@ -9,8 +9,6 @@ import { FETCH_PATTERNS_PROMPT } from "@constants/prompts";
 import validateOpenaiPatternsResponse from "@helpers/validateOpenaiPatternsResponse";
 import { ClientSession, Document } from "mongoose";
 import { TUsersOpenaiPatterns, UsersOpenaiPatterns } from "@models/users_openai_patterns";
-import { kafka } from "@helpers/kafkaConnectionManager";
-import { KAFKA_TOPICS } from "@constants/kafkaTopics";
 import config from "../../config";
 
 const PATTERNS_BATCH_SIZE = 3;
@@ -132,7 +130,6 @@ async function main() {
 			const usersOpenaiPatternsIDs = newUsersOpenaiPatternsDocs.map((doc) => doc._id!.toString());
 			usersOpenaiPatternsIDsArray.push(...usersOpenaiPatternsIDs);
 		}
-		await kafka.produce(KAFKA_TOPICS.NEW_PATTERNS_FOUND, [{ value: JSON.stringify({ usersOpenaiPatternsIDsArray }) }]);
 	} catch (e) {
 		logger.error(`Error at fetchPatterns ${e}`, e);
 	} finally {
