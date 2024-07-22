@@ -29,7 +29,7 @@ async function main() {
 			{ pair: true, compareIntervalValue: true, compareIntervalType: true }
 		).lean();
 
-		const usersOpenaiPatternsIDsArray: string[] = [];
+		// const usersOpenaiPatternsIDsArray: string[] = [];
 		for (let i = 0; i < patternsInUsersQueueCount; i += PATTERNS_BATCH_SIZE) {
 			const patternsInUsersQueue = await UsersOpenaiPatternsQueue.find({}, { openaiPatternsID: true, usersID: true })
 				.skip(i)
@@ -42,6 +42,7 @@ async function main() {
 				return { ...patternConfig, usersID: pattern.usersID };
 			});
 
+			logger.info(`Patterns in queue ${JSON.stringify(patternsInUsersQueueWithConfig)}`);
 			const usersPatternsQueueWithData = await Promise.all(
 				patternsInUsersQueueWithConfig.map(async (pattern) => {
 					if (!pattern.pair?.length) {
@@ -59,6 +60,7 @@ async function main() {
 								usersID: pattern.usersID,
 								operationType: "find",
 							});
+							logger.info(`Fetched measurements ${JSON.stringify(fetchedMeasurements)}`);
 							return {
 								measurementCode: pair.measurementCode as TMeasurementCode,
 								fetchedMeasurements,
@@ -127,8 +129,8 @@ async function main() {
 			});
 			await mongoSession.endSession();
 
-			const usersOpenaiPatternsIDs = newUsersOpenaiPatternsDocs.map((doc) => doc._id!.toString());
-			usersOpenaiPatternsIDsArray.push(...usersOpenaiPatternsIDs);
+			// const usersOpenaiPatternsIDs = newUsersOpenaiPatternsDocs.map((doc) => doc._id!.toString());
+			// usersOpenaiPatternsIDsArray.push(...usersOpenaiPatternsIDs);
 		}
 	} catch (e) {
 		logger.error(`Error at fetchPatterns ${e}`, e);
