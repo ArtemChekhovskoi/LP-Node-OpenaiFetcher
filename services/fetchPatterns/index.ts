@@ -120,6 +120,7 @@ async function main() {
 					title: answer.title,
 					description: answer.description,
 					isShownToUser: false,
+					isViewedByUser: false,
 				});
 			});
 			mongoSession = await UsersOpenaiPatternsQueue.startSession();

@@ -5,5 +5,8 @@
   },
   "createOpenaiQueue": {
     "sleepTimeSeconds": 5
+  },
+  "showPatternsToUser": {
+    "frequency": "00 30 16 * * *"
   }
 }
