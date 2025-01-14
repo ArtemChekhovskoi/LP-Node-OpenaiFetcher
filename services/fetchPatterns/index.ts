@@ -139,7 +139,7 @@ async function main() {
 		if (mongoSession) {
 			await mongoSession.endSession();
 		}
-		logger.info(`Going to sleep for ${config.fetchPatterns.sleepTimeSeconds} seconds`);
+		logger.info(`Going to sleep for ${config.fetchPatterns.sleepTimeSeconds} sec`);
 	}
 }
 
